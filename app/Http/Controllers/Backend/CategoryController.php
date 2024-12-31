@@ -39,7 +39,7 @@ class CategoryController extends Controller
      */
     public function index(CategoryListRequest $request)
     {
-        // $this->authorize('modules', '' . self::OBJECT . '.index');
+        $this->authorize('modules', '' . self::OBJECT . '.index');
         session()->forget('image_temp'); // Clear temporary image value
         // Validate the request data
         $request->validated();
@@ -71,7 +71,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        // $this->authorize('modules', 'edit accounts');
+        $this->authorize('modules', '' . self::OBJECT . '.create');
         return view(self::PATH_VIEW . __FUNCTION__, [
             'object' => 'category',
         ]);
@@ -104,7 +104,7 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
-        // Retrieve the details of the Category
+        $this->authorize('modules', '' . self::OBJECT . '.edit');
         $category = $this->categoryService->getCategoryDetail($id);
         if ($category) {
             return view(self::PATH_VIEW . __FUNCTION__, [
@@ -128,36 +128,9 @@ class CategoryController extends Controller
         // Validate the data from the request using CategoryUpdateRequest
         $data = $request->validated();
         try {
-            // // Gửi thông báo chung
-            // $title = 'Category';
-            // $message = 'edited category!';
-
-            // Log::info('Starting update process for category ID: ' . $id); // Log thông tin
-
-            // event(new NotificationEvent($title, $message, 'info', Auth::user()->full_name));
-            // // dispatch(new SendNotificationJob($title, $message, 'info', Auth::user()->full_name)); // Thay thế 'info' và $review nếu cần
-
-            // $dataNotification = [
-            //     'user_id' => Auth::user()->id,  // ID của người gửi thông báo
-            //     'title' => $title,
-            //     'message' => $message,
-            // ];
-
-            // Log::info('Preparing notification data: ', $dataNotification); // Log thông tin
-
-            // $this->notificationService->createNotification($dataNotification);
-
-            // // Cập nhật danh mục
-            // Log::info('Updating category with data: ', $data); // Log thông tin
-            // Update the Category
             $this->categoryService->updateCategory($id, $data);
-
-            // Log::info('Category updated successfully for ID: ' . $id); // Log khi thành công
-
             return redirect()->route('admin.category.index')->with('success', 'Category updated successfully');
         } catch (\Exception $e) {
-            // Log::error('Error updating category: ' . $e->getMessage()); // Ghi log chi tiết lỗi
-            // Log::error('Exception trace: ', ['trace' => $e->getTraceAsString()]); // Log thêm trace để chi tiết hơn về lỗi
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

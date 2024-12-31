@@ -50,7 +50,8 @@
 
     CUONG.renderMenuItem = async (menuItems) => {
         $('#list_menu_item').empty()
-        if (menuItems.invoice.invoice_items.length === 0) {
+
+        if (menuItems.invoice == null) {
             $('#list_menu_item').append('<tr><td colspan="3" class="text-center">No items selected.</td></tr>')
         } else {
             await menuItems.invoice.invoice_items.forEach(item => {
@@ -86,7 +87,7 @@
                         <div class="div">
                             <p class="m-0">${voucher.title}</p>
                             <small class="m-0">Mô tả: ${voucher.description}</small> <br>
-                            <small>Số lượng: ${(voucher.total - voucher.promotion_users.length) <= 0 ? 0 : voucher.total - voucher.promotion_users.length }</small>
+                            <small>Số lượng: ${(voucher.total - voucher.promotion_users.length) <= 0 ? 0 : voucher.total - voucher.promotion_users.length}</small>
                         </div>
                     </div>
                 `)
@@ -105,7 +106,7 @@
                         <div class="div">
                             <p class="m-0">${voucher.title}</p>
                             <small class="m-0">Mô tả: ${voucher.description}</small> <br>
-                            <small >Số lượng: ${(voucher.total - voucher.promotion_users.length) <= 0 ? 0 : voucher.total - voucher.promotion_users.length }</small>
+                            <small >Số lượng: ${(voucher.total - voucher.promotion_users.length) <= 0 ? 0 : voucher.total - voucher.promotion_users.length}</small>
                         </div>
                     </div>
                 `)
@@ -113,50 +114,51 @@
         }
     }
     CUONG.addInvoice = (data) => {
-        fetch("/admin/invoice/store", {
-            method: 'POST',
+        $.ajax({
+            url: "/admin/invoice/store",
+            method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => executeExample('success')
-            )
-            .catch(error => console.error('Lỗi khi thêm:', error))
+            data: JSON.stringify(data),
+            success: function (response) {
+                if (response.success) {
+                    executeExample('success');
+                } else {
+                    alert('Lỗi khi thêm hóa đơn.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
     }
 
-    CUONG.exportAndSavePDF = (data) => {
-        fetch("/admin/invoice/exportPDF", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+    CUONG.exportAndSavePDF = (reservationId) => {
+        $.ajax({
+            url: "/admin/invoice/exportPDF",
+            method: "POST",
+            data: {
+                reservation_id: reservationId,
+                _token: $('meta[name="csrf-token"]').attr('content')
             },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const pdfContent = data.pdfContent;
-                    const fileName = data.fileName;
-
-                    const binary = atob(pdfContent);
-                    const array = new Uint8Array(binary.length);
-                    for (let i = 0; i < binary.length; i++) {
-                        array[i] = binary.charCodeAt(i);
-                    }
-
-                    const blob = new Blob([array], { type: 'application/pdf' });
+            success: function (response) {
+                console.log(response);
+                if (response.success) {
+                    const pdfUrl = response.pdfUrl;
 
                     // Mở PDF trong một tab mới
-                    const pdfURL = URL.createObjectURL(blob);
-                    window.open(pdfURL, '_blank');
+                    window.open(pdfUrl, '_blank');
                 } else {
                     alert('Lỗi khi tạo và lưu hóa đơn.');
                 }
-            })
-            .catch(error => console.error('Lỗi khi thêm:', error));
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
     }
+
     //Show Modal Data
     CUONG.showBsModal = () => {
         $('#pay').on('show.bs.modal', async function (event) {
@@ -167,22 +169,28 @@
                 reservationId = button.attr('dataReservationId')
                 invoiceDetail = await CUONG.fetchInvoiceDetail(`/admin/payment/${reservationId}`);
                 CUONG.renderMenuItem(invoiceDetail);
-                
+                $("#idDonhang").attr("idDonHang", invoiceDetail.reservation.id);
                 let voucher_discount = 0;
                 let code;
                 $('#pay').find('.btn_paid').attr('id', `btn_paid_${reservationId}`);
-                var total_amount = invoiceDetail.invoice.total_amount;
-                let total_payment = invoiceDetail.invoice.total_amount;
+                let total_amount = 0
+                let total_payment = 0
+
+                if (invoiceDetail.invoice) {
+                    total_amount = invoiceDetail.invoice.total_amount
+                    total_payment = invoiceDetail.invoice.total_amount
+                }
+
                 $('#pay').find('.total-amount').text(formatNumber(total_amount))
                 $('#pay').find('.total-payment').text(formatNumber(total_payment))
 
-                $('input[name="payment_method"]').on('change', function () {
-                    if ($(this).val() === 'bank') {
-                        $('#qr-image').show(); // Hiển thị hình ảnh QR khi chọn "Chuyển khoản"
-                    } else {
-                        $('#qr-image').hide(); // Ẩn hình ảnh QR khi chọn phương thức khác
-                    }
-                });
+                // $('input[name="payment_method"]').on('change', function () {
+                //     if ($(this).val() === 'bank') {
+                //         $('#qr-image').show(); // Hiển thị hình ảnh QR khi chọn "Chuyển khoản"
+                //     } else {
+                //         $('#qr-image').hide(); // Ẩn hình ảnh QR khi chọn phương thức khác
+                //     }
+                // });
                 let allVoucher = await CUONG.fetchVoucher(`/getAllVoucher`);
                 CUONG.renderAllVoucher(allVoucher);
                 let feedback = $('#pay').find('.feedback-voucher');
@@ -230,28 +238,62 @@
                                 voucher_discount = voucher_discount - total_amount
                             }
                             $('#pay').find('.voucher-discount').text(`Giảm giá : ${formatNumber(voucher_discount)}`);
+                            $('#pay').find('.voucher-discount').attr('data-id-vouchar', selectedVoucherId);
                             $('#pay').find('.voucher-discount').show();
                             $('#pay').find('.total-payment').text(formatNumber(total_payment));
                         }
                     }
                 });
-                $(`#btn_paid_${reservationId}`).off('click').click((e) => {
-                    let data = {
-                        _token: _token,
-                        invoiceDetail,
-                        total_payment,
-                        voucher_discount,
-                        code,
+                $(`#btn_paid_${reservationId}`).off('click').click(async (e) => {
+                    if (total_amount == 0 && total_payment == 0) {
+                        alert('Vui lòng chọn món để được thanh toán!')
+                        return
                     }
-                    console.log(data);
-                    
-                    $('#pay').modal('hide'),
 
-                        CUONG.addInvoice(data)
-                        CUONG.exportAndSavePDF(data)
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 3000)
+                    let checkDish = true
+
+                    await invoiceDetail.invoice.invoice_items.forEach(menu => {
+                        let hasKey1 = false;
+                        let hasKey2 = false;
+
+                        Object.entries(JSON.parse(menu.status_menu)).forEach(([key, value]) => {
+                            if (key == 1 && value != 0) {
+                                hasKey1 = true;
+                            }
+                            if (key == 2 && value != 0) {
+                                hasKey2 = true;
+
+                            }
+                        });
+
+                        if (hasKey1 || hasKey2) {
+                            checkDish = false; // Nếu có cả key 1 và key 2 với giá trị khác 0
+                        }
+
+                    });
+
+                    if (checkDish) {
+                        let payment_method = 'cash';
+                        let data = {
+                            _token: _token,
+                            invoiceDetail,
+                            total_payment,
+                            voucher_discount,
+                            code,
+                            payment_method
+                        };
+
+                        $('#pay').modal('hide');
+
+                        CUONG.addInvoice(data);
+                        CUONG.exportAndSavePDF(reservationId);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    } else {
+                        alert('Món ăn chưa lên đầy đủ!');
+                        return;
+                    }
                 });
             }
 

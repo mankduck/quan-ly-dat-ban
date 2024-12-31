@@ -14,6 +14,8 @@ interface ReservationServiceInterface
      */
     public function getAllReservations(array $filters = [], int $perPage = 15);
 
+    public function getAllReservationsArrived(array $filters = [], int $perPage = 5);
+
     /**
      * Get details of a Reservation by ID.
      *
@@ -46,4 +48,6 @@ interface ReservationServiceInterface
      * @return bool
      */
     public function deleteReservation(int $id);
+
+    public function isOrderAwaitingConfirmation(int $phone);
 }

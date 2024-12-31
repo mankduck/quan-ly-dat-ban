@@ -30,7 +30,7 @@ class PromotionController extends Controller
 
     public function index(ListRequest $request)
     {
-        // $this->authorize('modules', '' . self::OBJECT . '.index');
+        $this->authorize('modules', '' . self::OBJECT . '.index');
         $request->validated();
         $params = $request->all();
 
@@ -38,7 +38,10 @@ class PromotionController extends Controller
             'search' => $params['keyword'] ?? '', // Ensure this matches the search input name
             'start_date' => $params['start_date'] ?? '',
             'end_date' => $params['end_date'] ?? '',
+            'is_active' => $params['is_active'] ?? ''
         ];
+
+        // dd($filters);
 
         $perPage = $params['per_page'] ?? self::PER_PAGE_DEFAULT;
 
@@ -64,6 +67,7 @@ class PromotionController extends Controller
 
     public function create()
     {
+        $this->authorize('modules', '' . self::OBJECT . '.create');
         return view(self::PATH_VIEW . __FUNCTION__, [
             'object' => 'promotion',
         ]);
@@ -81,6 +85,7 @@ class PromotionController extends Controller
 
     public function edit($id)
     {
+        $this->authorize('modules', '' . self::OBJECT . '.edit');
         $data = $this->promotionService->getPromotionDetail($id);
         return view(self::PATH_VIEW . __FUNCTION__, [
             'object' => 'promotion',

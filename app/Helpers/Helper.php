@@ -288,16 +288,16 @@ if (!function_exists('formatDate')) {
     }
 }
 
-// if (!function_exists('formatCreateDate')) {
-//     function formatCreateDate($amount)
-//     {
-//         if ($amount == null || $amount == '') {
-//             return '';
-//         }
+if (!function_exists('formatCreateDate')) {
+    function formatCreateDate($amount)
+    {
+        if ($amount == null || $amount == '') {
+            return '';
+        }
 
-//         return Carbon::parse($amount)->format('Y-m-d H:i:s');
-//     }
-// }
+        return Carbon::parse($amount)->format('Y-m-d H:i:s');
+    }
+}
 
 if (!function_exists('formatDiscount')) {
     function formatDiscount($value)
@@ -307,14 +307,22 @@ if (!function_exists('formatDiscount')) {
 }
 
 if (!function_exists('checkBladeAdmin')) {
-    function checkBladeAdmin()
+    function checkBladeAdmin($role = null)
     {
         if (Auth::check() && Auth::user()->role_id == 1) {
             return '';
         } else if (Auth::check() && Auth::user()->role_id == 2) {
-            return 'none';
+            if ($role == 2) {
+                return '';
+            } else {
+                return 'none';
+            }
+        } else if (Auth::check() && Auth::user()->role_id == 3) {
+            if ($role == 3) {
+                return '';
+            } else {
+                return 'none';
+            }
         }
     }
 }
-
-

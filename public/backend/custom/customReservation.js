@@ -17,7 +17,6 @@
                     reservation_id: reservationId
                 }
             });
-            console.log(response); // In kết quả trong console
             return response;
         } catch (error) {
             console.error(error);
@@ -27,83 +26,126 @@
 
 
     PMD.createInvoiceDataDetail = (item, guest) => {
-        let data = {
-            _token: _token,
-            guests_detail: guest,
-            reservation_id: item.reservation_id,
-            reservation_code: item.reservation_code,
-            total_amount: item.totalAmount,
-            list_table: item.list_table,
-            invoice_item: item.invoice_item,
-        }
-
-        $.ajax({
-            url: '/create-invoice-detail',
-            type: 'POST',
-            data: data,
-            success: async function (response) {
-                executeExample('success')
-            },
-            error: function (xhr, status, error) {
-                executeExample('error')
+        if (item.list_table == null) {
+            alert('Vui lòng chọn bàn!');
+        } else {
+            let data = {
+                _token: _token,
+                guests_detail: guest,
+                reservation_id: item.reservation_id,
+                reservation_code: item.reservation_code,
+                total_amount: item.totalAmount,
+                list_table: item.list_table,
+                invoice_item: item.invoice_item,
             }
-        })
+
+            $.ajax({
+                url: '/create-invoice-detail',
+                type: 'POST',
+                data: data,
+                success: async function (response) {
+                    // executeExample('success')
+                },
+                error: function (xhr, status, error) {
+                    executeExample('error')
+                }
+            })
+        }
     }
 
 
     PMD.updateInvoiceDataDetail = (item) => {
-        let data = {
-            _token: _token,
-            invoice_id: item.invoice_id,
-            reservation_id: item.reservation_id,
-            total_amount: item.totalAmount,
-            list_table: item.list_table,
-            invoice_item: item.invoice_item,
-        }
-
-        $.ajax({
-            url: '/update-invoice-detail',
-            type: 'POST',
-            data: data,
-            success: async function (response) {
-                executeExample('success')
-            },
-            error: function (xhr, status, error) {
-                executeExample('error')
+        if (item.list_table == null) {
+            alert('Vui lòng chọn bàn!');
+        } else {
+            
+            let data = {
+                _token: _token,
+                invoice_id: item.invoice_id,
+                reservation_id: item.reservation_id,
+                total_amount: item.totalAmount,
+                list_table: item.list_table,
+                invoice_item: item.invoice_item,
             }
-        })
+
+            $.ajax({
+                url: '/update-invoice-detail',
+                type: 'POST',
+                data: data,
+                success: async function (response) {
+                    // executeExample('success')
+                },
+                error: function (xhr, status, error) {
+                    executeExample('error')
+                }
+            })
+        }
     }
 
 
     //Check Arrived
     PMD.selectArrived = async () => {
         $(document).on('change', '.selectReservation', function (e) {
-            let selectedValue = $(this).val()
-            let accountId = $(this).attr('data-account-id')
+            e.preventDefault();
+
+            // Hiển thị spinner
+            showSpinner();
+
+            let selectedValue = $(this).val();
+            let accountId = $(this).attr('data-account-id');
             let data = {
                 _token: _token,
                 id: accountId,
                 status: selectedValue
-            }
+            };
+
             $.ajax({
                 url: '/admin/reservation/updateStatus',
                 type: 'POST',
                 data: data,
                 success: async function (response) {
+                    hideSpinner();
                     if (response.data.status === 'arrived') {
-                        await PMD.renderTdMenu(accountId)
-                        await PMD.renderSelectArrived(accountId)
-                        // $('#exampleModal').modal('show')
+                        await PMD.renderTdMenu(accountId);
+                        await PMD.renderSelectArrived(accountId);
                     }
-                    executeExample('success')
+
+                    if (response.data.status === 'confirmed') {
+                        setTimeout(() => {
+                            window.location.href = window.location.href;
+                        }, 1000);
+                    }
+
+                    if (response.data.status === 'canceled') {
+                        setTimeout(() => {
+                            window.location.href = window.location.href;
+                        }, 1000);
+                    }
+                    executeExample('success');
                 },
                 error: function (xhr, status, error) {
-                    executeExample('error')
+                    // Ẩn spinner khi có lỗi
+                    spinner.style.display = 'none';
+                    executeExample('error');
                 }
-            })
-            e.preventDefault()
-        })
+            });
+        });
+    };
+
+    function showSpinner() {
+        document.querySelector('.overlay').style.display = 'block';
+        document.querySelector('.spinner').style.display = 'block';
+        document.querySelector('.startbar').classList.add('blur'); // Thêm lớp làm mờ startbar
+        document.querySelector('.topbar').classList.add('blur'); // Thêm lớp làm mờ topbar
     }
+
+    function hideSpinner() {
+        document.querySelector('.overlay').style.display = 'none';
+        document.querySelector('.spinner').style.display = 'none';
+        document.querySelector('.startbar').classList.remove('blur'); // Xóa lớp làm mờ startbar
+        document.querySelector('.topbar').classList.remove('blur'); // Xóa lớp làm mờ topbar
+    }
+
 
     PMD.checkArrived = async () => {
         let reservation = $('.selectReservation')
@@ -172,6 +214,7 @@
                 // return
                 $('#availableMenu').empty()
                 let data = response.menus
+                // return
                 if (data && data.length > 0) {
                     PMD.renderListMenu(data)
                 } else {
@@ -229,13 +272,18 @@
             html += `
             <div class="tab-pane p-3 ${active}" id="${cate.slug}" role="tabpanel">
                 <div class="row">
-                ${cate.menus && cate.menus.length > 0 ? cate.menus.map(menu => `
-                    <div class="menu-info col-2 mb-4" data-menu-id="${menu.id}" data-menu-name="${menu.name}" data-menu-price="${menu.price}">
-                        <img class="my-2" src="/storage/${menu.image_url}" alt="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-                        <p>${menu.name}</p>
-                        <p>Giá: ${PMD.formatCurrency(menu.price)}đ</p>
+                ${cate.menus && cate.menus.length > 0 ? cate.menus.map(menu =>
+                `
+                    <div class="menu-info col-2 mb-4 ${menu.status !== 'active' ? 'sold-out' : ''}" 
+                    data-menu-id="${menu.id}" 
+                    data-menu-name="${menu.name}" 
+                    data-menu-price="${menu.price}">
+                    <img class="my-2" src="/storage/${menu.image_url}" alt="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                    <p>${menu.name}</p>
+                    <p>Giá: ${PMD.formatCurrency(menu.price)}đ</p>
                     </div>
-                `).join('') : '<p>Không có menu nào</p>'}
+                    `
+            ).join('') : '<p>Không có menu nào</p>'}
                 </div>
             </div>
         `
@@ -258,8 +306,8 @@
             dataReservationId="${reservationId}" dataTableId="${tableId}" dataGuests="${dataGuest}" dataReservationCode="${dataCode}" data-bs-target="#exampleModal">
             Đặt món
             </button>
-            <button class="btn btn-warning" data-bs-toggle="modal"
-            dataReservationId="${reservationId}" data-bs-target="#pay">Thanh toán</button>
+            <button class="btn btn-warning" data-bs-toggle="modal" id="btn-reservation-id"
+            dataReservationId="${reservationId}" data-reservation-id="${reservationId}" data-reservation-code="${dataCode}" data-bs-target="#pay">Thanh toán</button>
         </td>
         `
         return reservation.append(html)
@@ -299,9 +347,10 @@
                 PMD.renderNotiTable(guestsReservation)
             }
             let invoiceData = await PMD.getInvoiceDataDetail(reservationId);
-            console.log(invoiceData);
-
+            let dataItem = await PMD.getInvoiceDataDetail(reservationId);
             if (invoiceData.length != []) {
+                const dataInvoiceItem = dataItem.invoice_item
+                console.log(dataInvoiceItem);
                 let selectedMenus = {
                     invoice_id: invoiceData.invoice_id,
                     reservation_id: invoiceData.reservation_id,
@@ -323,26 +372,36 @@
                 })
 
                 selectedMenus.invoice_item.forEach(item => {
-                    $('.menu-info[data-menu-id="' + item.id + '"]').addClass('selected')
+                    Object.entries(item.status_menu).forEach(([key, value]) => {
+                        if(key == 2 && value != 0 || key == 3 && value!=0){
+                        $('.menu-info[data-menu-id="' + item.id + '"]').addClass('selected cursor-not-allowed-menu');
+                        }else{
+                            $('.menu-info[data-menu-id="' + item.id + '"]').addClass('selected')
+                        }
+                    })
                 })
 
 
                 $('#availableMenu').off('click').on('click', '.menu-info', function () {
-                    $(this).toggleClass('selected')
-                    const menuId = $(this).data('menu-id')
-                    const menuPrice = $(this).data('menu-price')
-                    const menuName = $(this).data('menu-name')
+                    if (!$(this).hasClass('cursor-not-allowed-menu')) {
+                        $(this).toggleClass('selected')
+                        const menuId = $(this).data('menu-id')
+                        const menuPrice = $(this).data('menu-price')
+                        const menuName = $(this).data('menu-name')
 
-                    if ($(this).hasClass('selected')) {
-                        selectedMenus.invoice_item.push({ id: menuId, name: menuName, quantity: 1, price: menuPrice, total: menuPrice }) // Initialize quantity to 1
-                    } else {
-                        selectedMenus.invoice_item = selectedMenus.invoice_item.filter(menu => menu.id !== menuId)
+                        if ($(this).hasClass('selected')) {
+                            selectedMenus.invoice_item.push({ id: menuId, name: menuName, quantity: 1, price: menuPrice, total: menuPrice, is_served: 0, status_menu_id: 'active'  }) // Initialize quantity to 1
+                        } else {
+                            selectedMenus.invoice_item = selectedMenus.invoice_item.filter(menu => menu.id !== menuId)
+                        }
+                        PMD.renderSelectedMenus(selectedMenus)
+                        $('#confirmSelection').toggle(selectedMenus.invoice_item.length > 0)
                     }
-                    PMD.renderSelectedMenus(selectedMenus)
-                    $('#confirmSelection').toggle(selectedMenus.invoice_item.length > 0)
+
                 })
                 await PMD.searchMenuItem(selectedMenus)
-                PMD.quantityInput(selectedMenus)
+                PMD.quantityInput(selectedMenus, dataInvoiceItem)
+
                 PMD.checkButtonAddInvoice(selectedMenus, guestsReservation, true)
                 return
             } else {
@@ -388,7 +447,7 @@
                     const menuName = $(this).data('menu-name')
 
                     if ($(this).hasClass('selected')) {
-                        selectedMenus.invoice_item.push({ id: menuId, name: menuName, quantity: 1, price: menuPrice, total: menuPrice }) // Initialize quantity to 1
+                        selectedMenus.invoice_item.push({ id: menuId, name: menuName, quantity: 1, price: menuPrice, total: menuPrice, served: 0, status_menu_id: 'active' }) // Initialize quantity to 1
                     } else {
                         selectedMenus.invoice_item = selectedMenus.invoice_item.filter(menu => menu.id !== menuId)
                     }
@@ -401,7 +460,6 @@
                 PMD.checkButtonAddInvoice(selectedMenus, guestsReservation)
                 return
             }
-
         })
     }
     //End Show Modal Data
@@ -450,20 +508,39 @@
     //End Render Button Amount
 
 
+    PMD.checkBoxServed = (arrayItem) => {
+        console.log(12313);
+        $('.served-checkbox').each(function () {
+            if ($(this).is(':checked')) {
+                let servedMenuId = $(this).data('served-id')
+                const existingMenu = arrayItem.invoice_item.find(menu => menu.id === servedMenuId);
+                existingMenu.is_served = 1;
+            }
+            return arrayItem
+        });
+    }
+
+
 
     //Button Add Invoice
     PMD.checkButtonAddInvoice = (item, guest, invoice = false) => {
         $(document).on('click', '.btnSaveInvoice', function () {
-            if (invoice == true) {
-                PMD.updateInvoiceDataDetail(item)
-
+            if (item.list_table == '') {
+                alert('Vui lòng chọn bàn!!');
             } else {
-                PMD.checkTableSelected(item, guest)
-                PMD.createInvoiceDataDetail(item, guest)
-            }
-            $('#exampleModal').on('hidden.bs.modal', function () {
+                if (invoice == true) {
+                    PMD.getStatusDish(item)
+                } else {
+                    // console.log(item);
+                    PMD.createInvoiceDataDetail(item, guest)
+                }
+
+                $('#exampleModal').modal('hide')
+
+                localStorage.setItem('showSuccessMessage', 'true')
+
                 window.location.reload()
-            })
+            }
         })
     }
     //End Button Add Invoice
@@ -530,73 +607,153 @@
 
 
     //Quantity Input
-    PMD.quantityInput = (selectedMenus) => {
+    PMD.quantityInput = (selectedMenus, dataInvoice = null) => {
         // Xử lý khi thay đổi số lượng qua input
         $('#array-menu').on('input', '.quantity-input', function () {
             const menuId = $(this).data('menu-id');
-            const newQuantity = parseInt($(this).val(), 10) || 1; // Nếu không có giá trị, mặc định là 1
+            const input = $(`.quantity-input[data-menu-id="${menuId}"]`);
             const menu = selectedMenus.invoice_item.find(item => item.id === menuId);
+            const currentValue = menu.quantity
+            const inputQuantityPrimary = $('.quantityPrimary-'+menuId)
+            const quantityPrimary = inputQuantityPrimary.text()
+            const newQuantity = parseInt($(this).val(), 10) || 1; // Nếu không có giá trị, mặc định là 1
+            const newQuantityPrimary = $(this).val() - parseInt(quantityPrimary)
 
-            if (menu) {
-                if (newQuantity > 100) {
-                    alert('Không được chọn quá 100 món cho mỗi loại!');
-                    $(this).val(100); // Đặt giá trị tối đa là 100
-                    menu.quantity = 100;
-                } else {
-                    menu.quantity = newQuantity;
-                }
-
-                menu.total = menu.quantity * menu.price;
-                let totalFormat = PMD.formatCurrency(menu.total);
-                $('.price-invoice-item-' + menu.id).html(totalFormat);
-                PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
-            }
+            menu.quantity = newQuantity;
+            menu.total = menu.quantity * menu.price;
+            let totalFormat = PMD.formatCurrency(menu.total);
+            $('.price-invoice-item-' + menu.id).html(totalFormat);
+            inputQuantityPrimary.html(newQuantityPrimary)
+            PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
         });
 
         // Xử lý khi nhấn nút giảm số lượng
         $('#array-menu').on('click', '.decrease-btn', function () {
             const menuId = $(this).data('menu-id');
             const input = $(`.quantity-input[data-menu-id="${menuId}"]`);
-            const currentValue = parseInt(input.val(), 10);
+            const inputQuantityPrimary = $('.quantityPrimary-'+menuId)
+            const quantityPrimary = inputQuantityPrimary.text()
+            // const currentValue = parseInt(input.val(), 10);
             const menu = selectedMenus.invoice_item.find(item => item.id === menuId);
+            const currentValue = menu.quantity
+            if(dataInvoice != null){
+                const dataInvoiceItem = dataInvoice.find(item => item.id === menuId)
 
-            if (menu && currentValue > 1) {
-                const newQuantity = currentValue - 1;
-                menu.quantity = newQuantity;
-                menu.total = newQuantity * menu.price;
-                input.val(newQuantity); // Cập nhật lại số lượng trong ô input
-                let totalFormat = PMD.formatCurrency(menu.total);
-                $('.price-invoice-item-' + menu.id).html(totalFormat);
-                PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
+                if (parseInt(quantityPrimary) != 0) {
+                    if(menu && currentValue > 1){
+                        const newQuantity = currentValue - 1;
+                        const newQuantityPrimary = parseInt(quantityPrimary) - 1
+                        menu.quantity = newQuantity;
+                        menu.total = newQuantity * menu.price;
+                        input.val(newQuantity); // Cập nhật lại số lượng trong ô input
+                        inputQuantityPrimary.html(newQuantityPrimary)
+                        let totalFormat = PMD.formatCurrency(menu.total);
+                        $('.price-invoice-item-' + menu.id).html(totalFormat);
+                        PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
+                    }
+                }else{
+                    if(menu && currentValue > 1 && dataInvoiceItem.quantity < currentValue){
+                        const newQuantity = currentValue - 1;
+                        const newQuantityPrimary = parseInt(quantityPrimary) - 1
+                        menu.quantity = newQuantity;
+                        menu.total = newQuantity * menu.price;
+                        input.val(newQuantity); // Cập nhật lại số lượng trong ô input
+                        inputQuantityPrimary.html(newQuantityPrimary)
+                        let totalFormat = PMD.formatCurrency(menu.total);
+                        $('.price-invoice-item-' + menu.id).html(totalFormat);
+                        PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
+                    }
+                }
+            }else{
+                if (menu && currentValue > 1) {
+                    const newQuantity = currentValue - 1;
+                    const newQuantityPrimary = parseInt(quantityPrimary) - 1
+                    menu.quantity = newQuantity;
+                    menu.total = newQuantity * menu.price;
+                    input.val(newQuantity); // Cập nhật lại số lượng trong ô input
+                    inputQuantityPrimary.html(newQuantityPrimary)
+                    let totalFormat = PMD.formatCurrency(menu.total);
+                    $('.price-invoice-item-' + menu.id).html(totalFormat);
+                    PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
+                }
             }
+
+            
         });
 
         // Xử lý khi nhấn nút tăng số lượng
         $('#array-menu').on('click', '.increase-btn', function () {
             const menuId = $(this).data('menu-id');
             const input = $(`.quantity-input[data-menu-id="${menuId}"]`);
-            const currentValue = parseInt(input.val(), 10);
+            const inputQuantityPrimary = $('.quantityPrimary-'+menuId)
+            const quantityPrimary = inputQuantityPrimary.text()
+            
+            // const currentValue = parseInt(input.val(), 10);
             const menu = selectedMenus.invoice_item.find(item => item.id === menuId);
-
-            if (menu) {
-                if (currentValue >= 100) {
-                    alert('Không được chọn quá 100 món cho mỗi loại!');
-                    return; // Không tăng thêm số lượng
-                }
-
-                const newQuantity = currentValue + 1;
-                menu.quantity = newQuantity;
-                menu.total = newQuantity * menu.price;
-                input.val(newQuantity); // Cập nhật lại số lượng trong ô input
-                let totalFormat = PMD.formatCurrency(menu.total);
-                $('.price-invoice-item-' + menu.id).html(totalFormat);
-                PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
-            }
+            const currentValue = menu.quantity
+            // const currentValue = parseInt(input.val(), 10);
+            const newQuantity = currentValue + 1;
+            const newQuantityPrimary = parseInt(quantityPrimary) + 1
+            menu.quantity = newQuantity;
+            menu.total = newQuantity * menu.price;
+            input.val(newQuantity); // Cập nhật lại số lượng trong ô input
+            inputQuantityPrimary.html(newQuantityPrimary)
+            let totalFormat = PMD.formatCurrency(menu.total);
+            $('.price-invoice-item-' + menu.id).html(totalFormat);
+            PMD.totalAmount(selectedMenus); // Tính lại tổng số tiền
         });
+
+        // $('.btnCloseReservation').on('click', function () {
+        //     alert('ajsd')
+        //     newQuantity = currentValue
+        // })
+
     };
 
     //End Quantity Input
 
+    PMD.getStatusDish = (selectedMenus) =>{
+        $('tr[data-status-menu-id]').each(function() {
+            let menuId = $(this).data('status-menu-id')
+
+            let invoiceItem = selectedMenus.invoice_item.find(item => item.id === menuId);
+    
+            if (invoiceItem) {
+                // Khởi tạo lại status_menu với giá trị mặc định
+                let statusCount = { 1: 0, 2: 0, 3: 0 };
+    
+                // Duyệt qua tất cả các button có số lượng món trong dòng này
+                $(this).find('.btn').each(function() {
+                    // Lấy số lượng món từ text của button
+                    let quantity = parseInt($(this).text());
+    
+                    // Lấy class của button để xác định trạng thái
+                    let buttonClass = $(this).attr('class');
+                    let selectedValue = null;
+    
+                    // Kiểm tra class để xác định trạng thái
+                    if (buttonClass.includes('primary')) {
+                        selectedValue = 1; // Xác nhận
+                    } else if (buttonClass.includes('warning')) {
+                        selectedValue = 2; // Đang nấu
+                    } else if (buttonClass.includes('success')) {
+                        selectedValue = 3; // Hoàn thành
+                    }
+    
+                    // Cộng số lượng vào trạng thái tương ứng
+                    if (selectedValue !== null) {
+                        statusCount[selectedValue] += quantity;
+                    }
+                });
+    
+                // Cập nhật lại status_menu cho invoiceItem
+                invoiceItem.status_menu = statusCount;
+            }
+        });
+    
+        
+        PMD.updateInvoiceDataDetail(selectedMenus)
+    }
 
 
     //Start Render Selected Menu
@@ -606,26 +763,69 @@
         if (selectedMenus.invoice_item.length === 0) {
             PMD.checkRenderButtonAmount(false)
             conditionTemp = 1
-            $('#array-menu').append('<tr><td colspan="3" class="text-center">No items selected.</td></tr>')
+            $('#array-menu').append('<tr><td colspan="4" class="text-center">No items selected</td></tr>')
         } else {
             PMD.checkRenderButtonAmount()
             conditionTemp = 2
+            let html = ''
             await selectedMenus.invoice_item.forEach(menu => {
+                console.log(selectedMenus.invoice_item);
+                
                 let total = PMD.formatCurrency(menu.total)
-                $('#array-menu').append(`
-                    <tr>
-                        <td>${menu.name}</td>
-                        <td class="text-center">
-                            <div class="d-flex align-items-center justify-content-center">
-                                <button class="btn btn-danger btn-sm decrease-btn me-2" data-menu-id="${menu.id}">-</button>
-                                <input type="text" class="quantity-input form-control text-center px-3 w-50" data-menu-id="${menu.id}" min="1" value="${menu.quantity}">
-                                <button class="btn btn-success btn-sm increase-btn ms-2" data-menu-id="${menu.id}">+</button>
-                            </div>
-                        </td>
-                        <td class="text-end"><span class="price-invoice-item-${menu.id}">${total}</span>đ</td>
-                    </tr>
-                `)
+                    if(menu.status_menu_id == 'active'){
+                        html += `
+                            <tr data-status-menu-id="${menu.id}">
+                                <td>${menu.name}</td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <button class="btn btn-danger btn-sm decrease-btn me-2" data-menu-id="${menu.id}">-</button>
+                                        <input type="text" class="quantity-input form-control" data-menu-id="${menu.id}" min="1" value="${menu.quantity}" readonly>
+                                        <button class="btn btn-secondary btn-sm increase-btn ms-2" data-menu-id="${menu.id}">+</button>
+                                    </div>
+                                </td>
+                                <td class="text-end"><span class="price-invoice-item-${menu.id}">${total}</span>đ</td>
+                                <td>
+                        `
+                    }else{
+                        html += `
+                        <tr data-status-menu-id="${menu.id}" class="bg_status">
+                            <td>${menu.name}</td>
+                            <td class="text-center">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <input type="text" class="quantity-input form-control" data-menu-id="${menu.id}" min="1" value="${menu.quantity}" readonly>
+                                </div>
+                            </td>
+                            <td class="text-end"><span class="price-invoice-item-${menu.id}">${total}</span>đ</td>
+                            <td>
+                    `
+                    }
+
+                if(menu.status_menu != null){
+                    Object.entries(menu.status_menu).forEach(([key, value]) => {
+                        let type = ''
+                        if(key == 1){
+                            type = 'primary quantityPrimary-'+menu.id
+                        }else if(key == 2){
+                            type = 'warning'
+                        }else if(key == 3){
+                            type = 'success'
+                        }
+                        html += `
+                                <button type="button" class="btn btn-${type} btn-sm text-end">${value}</button>
+                        `
+                    })
+                }else{
+                    html += `
+                                <button type="button" class="btn btn-primary btn-sm text-end quantityPrimary-${menu.id}">1</button>
+                                <button type="button" class="btn btn-warning btn-sm text-end">0</button>
+                                <button type="button" class="btn btn-success btn-sm text-end">0</button>
+                        `
+                }
+                html += '</td><tr>'
+
+
             })
+            $('#array-menu').append(html)
             PMD.totalAmount(selectedMenus)
         }
     }
@@ -656,38 +856,79 @@
     PMD.createReservationNew = () => {
         $(document).on('click', '.btnCreateReservation', function (e) {
             e.preventDefault()
+
+            $('.errorReservation').html('')
+
             let _this = $(this)
 
-            let name = $('input[name="name"]').val()
-            let email = $('input[name="email"]').val()
-            let phone = $('input[name="phone"]').val()
-            let guest = $('input[name="guest"]').val()
-            let message = $('textarea[name="message"]').val()
+            let name = $('input[name="nameAddNew"]').val()
+            let email = $('input[name="emailAddNew"]').val()
+            let phone = $('input[name="phoneAddNew"]').val()
+            let guest = $('input[name="guestAddNew"]').val()
+            let message = $('textarea[name="messageAddNew"]').val()
             let code = PMD.randomCodeReservation()
+            let checked = true
 
-            let data = {
-                'code': code,
-                'name': name,
-                'email': email,
-                'phone': phone,
-                'guests': guest,
-                'special_request': message
+            $('.errNameReservation').text('');
+            $('.errEmailReservation').text('');
+            $('.errPhoneReservation').text('');
+            $('.errGuestReservation').text('');
+
+            if (!name) {
+                $('.errNameReservation').append('Tên khách hàng không được trống')
+                checked = false
+            }
+            if (!email) {
+                $('.errEmailReservation').append('Email khách hàng không được trống')
+                checked = false
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                $('.errEmailReservation').append('Email không hợp lệ');
+                checked = false;
             }
 
-            $.ajax({
-                url: '/create-new-reservation',
-                type: 'POST',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': _token
-                },
-                success: async function (response) {
-                    executeExample('success')
-                },
-                error: function (xhr, status, error) {
-                    executeExample('error')
+            if (!phone) {
+                $('.errPhoneReservation').append('SDT khách hàng không được trống')
+                checked = false
+            } else if (!/^\d{10,11}$/.test(phone)) {
+                $('.errPhoneReservation').append('Số điện thoại phải là số từ 10 đến 11 chữ số');
+                checked = false;
+            }
+
+            if (!guest) {
+                $('.errGuestReservation').append('Số lượng khách hàng không được trống')
+                checked = false
+            } else if (isNaN(guest) || parseInt(guest) <= 0) {
+                $('.errGuestReservation').append('Số lượng khách phải là số lớn hơn 0');
+                checked = false;
+            }
+
+            if (checked == true) {
+                let data = {
+                    'code': code,
+                    'name': name,
+                    'email': email,
+                    'phone': phone,
+                    'guests': guest,
+                    'special_request': message
                 }
-            })
+
+                $.ajax({
+                    url: '/create-new-reservation',
+                    type: 'POST',
+                    data: data,
+                    headers: {
+                        'X-CSRF-TOKEN': _token
+                    },
+                    success: async function (response) {
+                        $('#create-reservation').modal('hide')
+                        localStorage.setItem('showSuccessMessage', 'true')
+                        window.location.reload()
+                    },
+                    error: function (xhr, status, error) {
+                        executeExample('error')
+                    }
+                })
+            }
 
         })
     }
@@ -695,6 +936,7 @@
     PMD.formatCurrency = (number) => {
         return number.toLocaleString();
     }
+
 
     //End Show Modal Data
     $(document).ready(function () {

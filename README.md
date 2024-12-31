@@ -2,7 +2,7 @@
  Website quản lý nhà hàng và đặt bàn trực tuyến
 
 cp .env.example .env
-composer install
+composer update
 php artisan key:generate
 php artisan migrate
 php artisan db:seed --class=RoleSeeder
@@ -13,8 +13,7 @@ php artisan db:seed --class=CategorySeeder
 php artisan db:seed --class=PermissionSeeder
 npm install
 npm run dev
-php artisan queue:work
-php artisan schedule:work
+
 composer update
 
 ❤️❤️❤️

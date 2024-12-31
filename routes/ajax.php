@@ -48,6 +48,7 @@ Route::get('get-invoice-item-data', [UpdateStatusReservation::class, 'getInvoice
 Route::post('create-new-reservation', [UpdateStatusReservation::class, 'createNewReservation']);
 Route::post('create-invoice-detail', [UpdateStatusReservation::class, 'createInvoiceDataDetail']);
 Route::post('update-invoice-detail', [UpdateStatusReservation::class, 'updateInvoiceDataDetail']);
+Route::post('update-status-menu-invoice-detail', [UpdateStatusReservation::class, 'updateStatusMenuInvoiceDetail']);
 
 
 Route::post('admin/menu/updateStatus', [UpdateStatusMenu::class, 'updateStatus'])->name('admin.menu.updateStatus');
@@ -106,5 +107,6 @@ Route::post('/remove-temp-image', function (Request $request) {
 })->name('image.removeTemp');
 
 Route::get("/checkVoucher", [AjaxPromotion::class, "getDetailVoucher"]);
+Route::get("/checkVoucherClient", [AjaxPromotion::class, "getDetailVoucherClient"]);
 Route::get("/searchVoucher", [AjaxPromotion::class, "searchVoucher"]);
 Route::get("/getAllVoucher", [AjaxPromotion::class, "getAllVoucher"]);

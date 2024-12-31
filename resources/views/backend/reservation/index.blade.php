@@ -11,8 +11,8 @@
         }
 
         .table-info.selected {
-            border-color: #007bff;
-            background-color: #e0f7ff;
+            border-color: #00ff40;
+            background-color: #d1ffe4;
         }
 
         .menu-info {
@@ -22,16 +22,47 @@
             text-align: center;
             cursor: pointer;
             transition: transform 0.2s, background-color 0.2s;
-        }
-
-        .menu-info:hover {
-            background-color: #f0f0f0;
-            transform: scale(1.05);
+            position: relative;
         }
 
         .menu-info.selected {
-            border-color: #007bff;
-            background-color: #e0f7ff;
+            border-color: #00ff40;
+            background-color: #d1ffe4;
+        }
+
+        /* Giao diện Sold Out */
+        .menu-info.sold-out {
+            opacity: 0.6;
+            /* Làm mờ */
+            pointer-events: none;
+            /* Không thể click */
+            cursor: not-allowed !important;
+            /* Con trỏ cấm */
+            background-color: #f9f9f9;
+            /* Nền nhạt */
+            border-color: rgba(255, 0, 0, 0.9);
+        }
+
+        .menu-info.sold-out img {
+            filter: grayscale(100%);
+            /* Ảnh đen trắng */
+        }
+
+        .menu-info.sold-out::after {
+            content: "Sold Out";
+            /* Thêm chữ */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 0, 0, 0.9);
+            /* Nền mờ */
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
         }
     </style>
     <div class="container-xxl">
@@ -39,7 +70,7 @@
             <div class="col-12">
                 @include('backend.reservation.component.filter.card', [
                     'title' => __('messages.system.table.title') . ' đơn hàng',
-                    'totalRecords' => $totalRecords,
+                    'todayArrivedCount' => $todayArrivedCount,
                 ])
 
                 <div class="card-body pt-0">
@@ -61,7 +92,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Chọn Bàn</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btnCloseReservation" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
 
@@ -91,35 +123,43 @@
                                         <div class="tab-pane p-3" id="menu" role="tabpanel">
                                             <div class="row justify-content-center">
                                                 <div class="row align-items-center">
-                                                    <div class="col-lg-8">
+                                                    <div class="col-lg-7">
                                                         <div class="input-group">
                                                             <input type="" class="form-control searchMenu"
                                                                 placeholder="Tìm kiếm món ăn"
                                                                 aria-describedby="button-addon3">
                                                         </div>
                                                     </div><!--end col-->
-                                                    <div class="col-lg-4">
+                                                    <div class="col-lg-5">
+                                                        <div class="">
+                                                            <h5>Chú thích</h5>
+                                                            <button class="btn btn-primary btn-sm">0</button>: Số lượng món
+                                                            xác nhận
+                                                            <button class="btn btn-warning btn-sm">0</button>: Số lượng món
+                                                            đang nấu
+                                                            <button class="btn btn-success btn-sm">0</button>: Số lượng món
+                                                            hoàn thành
+                                                        </div>
                                                     </div><!--end col-->
 
                                                 </div> <!--end row-->
-                                                <div class="col-md-8 col-lg-8">
+                                                <div class="col-md-7 col-lg-7">
                                                     <div class="card-header px-0">
 
                                                     </div><!--end card-header-->
                                                     <div id="availableMenu" class="row">
                                                     </div>
                                                 </div> <!--end col-->
-                                                <div class="col-md-4 col-lg-4">
+                                                <div class="col-md-5 col-lg-5">
                                                     <div class="card">
                                                         <div class="card-header px-0">
                                                             <div class="row align-items-center">
                                                                 <div class="col">
-                                                                    {{-- <p>Món đã chọn:</p> --}}
-                                                                    {{-- <input type="hidden" name="" id="idTable_"> --}}
+
                                                                 </div><!--end col-->
                                                             </div> <!--end row-->
                                                         </div><!--end card-header-->
-                                                        <div class="card-body pt-0">
+                                                        <div class="card-body pt-0 px-0">
                                                             <div class="row align-items-center">
                                                                 <div class="col">
                                                                     <h5 class="">Món đã chọn:</h5>
@@ -131,8 +171,10 @@
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Tên món</th>
-                                                                        <th class="text-center">Số lượng</th>
-                                                                        <th class="text-end">Thành tiền</th>
+                                                                        <th class="text-center" style="width: 160px">Số
+                                                                            lượng</th>
+                                                                        <th class="text-center">Thành tiền</th>
+                                                                        <th class="text-center">Lên món</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="array-menu"></tbody>
@@ -154,7 +196,7 @@
         </div>
     </div>
 
-
+    <!--  -->
     <div class="modal fade" id="pay" tabindex="-1" aria-labelledby="paylable" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
@@ -204,7 +246,8 @@
                                 </div><!--end card-header-->
                                 <div class="card-body pt-0">
                                     <h5 style="display: none"><span class="total-amount">0</span></h5>
-                                    <h5 style="display: none" class="voucher-discount"></h5>
+                                    <h5 style="display: none" class="voucher-discount" id="voucher-discount"
+                                        data-id-vouchar=""></h5>
                                     <h5>Tổng thanh toán : <span class="total-payment">0</span></h5>
                                     <hr>
                                     <label>Nhập mã giảm giá</label>
@@ -227,9 +270,14 @@
 
                                         </div>
                                     </div>
-                                    
-                                    <button class="btn btn-primary py-2 px-3 mx-1 mt-3 btn_paid" id="">Đã thanh
-                                        toán</button>
+
+                                    <button type="button" class="btn btn-primary py-2 px-3 mx-1 mt-3 btn_qr_code"
+                                        id="idDonhang" data-id="">
+                                        QR Code
+                                    </button>
+
+                                    <button class="btn btn-primary py-2 px-3 mx-1 mt-3 btn_paid" id="">Trả tiền
+                                        mặt</button>
                                 </div><!--end card-body-->
                             </div><!--end card-->
                         </div>
@@ -240,10 +288,34 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="qr_code" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">QR Code</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img class="text-center" id="qr-code-image" src="" alt="QR Code" width="380px">
+                </div>
+                <div class="modal-footer">
+                    {{-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="checkPaid()">Check ngay</button>
+                    <button type="button" class="btn btn-primary" onclick="confirm_pay_qrCode()">Xác nhận chuyển khoản</button> --}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cursor-not-allowed-menu" title="Đã lên món không thể hủy"></div>
+
     @push('script')
+        <script src="{{ asset('backend/custom/customQrCode.js') }}"></script>
         <script src="{{ asset('backend/custom/customTemp.js') }}"></script>
         <script src="{{ asset('backend/custom/data.js') }}"></script>
         <script src="{{ asset('backend/custom/customReservation.js') }}"></script>
-        <script src="{{ asset('backend/custom/customPayment.js?v=108') }}"></script>
+        <script src="{{ asset('backend/custom/customPayment.js') }}"></script>
     @endpush
 @endsection

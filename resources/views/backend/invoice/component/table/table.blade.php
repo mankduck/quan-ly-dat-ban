@@ -5,13 +5,14 @@
                 <div class="form-check mb-0 ms-n1">
                 </div>
             </th>
-            <th>#</th>
+            <th>Mã đơn hàng</th>
             <th>{{ __('messages.reservation.fields.reservation_information') }}</th>
             <th>{{ __('messages.reservation.fields.guests') }}</th>
             <th>{{ __('messages.reservation.fields.reservation_time') }}</th>
             {{-- <th>{{ __('messages.system.status') }}</th> --}}
             <th>{{ __('messages.invoice.fields.payment_method') }}</th>
             <th>{{ __('messages.invoice.fields.status') }}</th>
+            <th>{{ __('messages.invoice.fields.isExport') }}</th>
             <th>{{ __('messages.invoice.fields.total_amount') }}</th>
             <th>{{ __('messages.system.table.fields.action') }}</th>
             {{-- <th>{{ __('messages.reservation.fields.dish') }}</th> --}}
@@ -25,7 +26,7 @@
                         <div class="form-check">
                         </div>
                     </td>
-                    <td>{{ $data->id ?? __('messages.system.no_data_available') }}</td>
+                    <td>{{ $data->code ?? __('messages.system.no_data_available') }}</td>
                     <td>
                         <ul>
                             <li>{{ __('messages.reservation.fields.full_name') }}:
@@ -74,6 +75,18 @@
                         @foreach ($statuses_invoice as $key => $option)
                             @if (isset($data->invoice->status) && $data->invoice->status == $key)
                                 <span class="badge bg-primary">{{ $option }}</span>
+                            @endif
+                        @endforeach
+                    </td>
+                    <td>
+                        @php
+                            $status_isEx = request('status_isEx') ?: old('status_isEx');
+                            $statuses_isEx = __('messages.invoice.isExport');
+                        @endphp
+
+                        @foreach ($statuses_isEx as $key => $option)
+                            @if (isset($data->invoice->isExport) && $data->invoice->isExport == $key)
+                                <span class="badge bg-primary @if($data->invoice->isExport == 0) bg-danger @endif">{{ $option }}</span>
                             @endif
                         @endforeach
                     </td>

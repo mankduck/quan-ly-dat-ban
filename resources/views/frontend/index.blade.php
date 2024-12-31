@@ -65,101 +65,21 @@
     </section><!--end section-->
     <!-- Hero End -->
 
-    <!-- Start -->
-    <section class="relative md:py-24 py-16">
+    <section class="relative md:py-16 py-8">
         <div class="container relative">
-            <div class="flex justify-center">
-                <div class="lg:w-1/2 md:w-2/3 w-full">
-                    <div class="text-center">
-                        <h4 class="text-3xl font-semibold">Câu Chuyện Của Chúng Tôi</h4>
-
-                        <p class="text-slate-400 mt-6">Ý tưởng phong cách nhà hàng đồ ăn của chúng tôi lấy cảm hứng từ phong
-                            cách ăn uống quốc tế, đặc biệt là tại châu Á. Khám phá những quầy đồ ăn sôi động khi các đầu bếp
-                            làm việc không ngừng.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-center mt-10">
-                <div class="lg:w-2/3 w-full">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="group relative">
-                            <img src="/frontend/assets/images/menu/m1.jpg" alt="">
-                            <div class="absolute inset-0 bg-slate-950/50"></div>
-                            <div class="absolute inset-0 m-6 border border-white/30"></div>
-                            <div class="absolute bottom-12 start-0 end-0 text-center">
-                                <h5 class="text-white/80 group-hover:text-white duration-500 text-xl">Thực Đơn Ăn Tối</h5>
-                            </div>
-                        </div>
-
-                        <div class="group relative">
-                            <img src="/frontend/assets/images/menu/m3.jpg" alt="">
-                            <div class="absolute inset-0 bg-slate-950/50"></div>
-                            <div class="absolute inset-0 m-6 border border-white/30"></div>
-                            <div class="absolute bottom-12 start-0 end-0 text-center">
-                                <h5 class="text-white/80 group-hover:text-white duration-500 text-xl">Thực Đơn Tráng Miệng
-                                </h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="container relative md:mt-24 mt-16">
             <div class="grid grid-cols-1 pb-8 text-center">
-                <h3 class="mb-6 md:text-3xl text-2xl md:leading-normal leading-normal font-semibold">Dịch Vụ</h3>
+                <h3 class="mb-6 md:text-3xl text-2xl md:leading-normal leading-normal font-semibold">Thực đơn của nhà hàng</h3>
 
-                <p class="text-slate-400 max-w-xl mx-auto">Ý tưởng phong cách nhà hàng đồ ăn của chúng tôi lấy cảm hứng từ
-                    phong cách ăn uống quốc tế, đặc biệt là tại châu Á.</p>
+                <p class="text-slate-400 max-w-xl mx-auto">Vô vàn món ăn ẩm thực nội ngoại</p>
             </div><!--end grid-->
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 mt-6 gap-6">
-                <div class="md:px-6 duration-500 text-center">
-                    <div
-                        class="size-20 bg-amber-500/5 mx-auto text-amber-500 text-3xl flex align-middle justify-center items-center shadow-sm dark:shadow-gray-800">
-                        <i class="mdi mdi-pizza"></i>
-                    </div>
-
-                    <div class="content mt-7">
-                        <a href="#" class="title h5 text-lg font-medium hover:text-amber-500">Đáp ứng phong cách ẩm
-                            thực</a>
-                        <p class="text-slate-400 mt-3">Đáp ứng phong cách ẩm thực của mọi người</p>
-                    </div>
-                </div>
-
-                <div class="md:px-6 duration-500 text-center">
-                    <div
-                        class="size-20 bg-amber-500/5 mx-auto text-amber-500 text-3xl flex align-middle justify-center items-center shadow-sm dark:shadow-gray-800">
-                        <i class="mdi mdi-silverware"></i>
-                    </div>
-
-                    <div class="content mt-7">
-                        <a href="#" class="title h5 text-lg font-medium hover:text-amber-500">Chất lượng nhà hàng</a>
-                        <p class="text-slate-400 mt-3"> Chất lượng nhà hàng đặt lên hàng đầu </p>
-                    </div>
-                </div>
-
-                <div class="md:px-6 duration-500 text-center">
-                    <div
-                        class="size-20 bg-amber-500/5 mx-auto text-amber-500 text-3xl flex align-middle justify-center items-center shadow-sm dark:shadow-gray-800">
-                        <i class="mdi mdi-moped-outline"></i>
-                    </div>
-
-                    <div class="content mt-7">
-                        <a href="#" class="title h5 text-lg font-medium hover:text-amber-500">Giao hàng tận nhà</a>
-                        <p class="text-slate-400 mt-3">Giao hàng tận nơi, đến tận tay người dùng</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
-    {{-- <section class="relative pt-6 md:pb-24 pb-16 bg-gray-50 dark:bg-slate-800">
+    <section class="relative pb-8">
         <div class="container relative">
             <div class="grid md:grid-cols-12">
                 <div class="lg:col-span-3 md:col-span-3 p-3">
-                    <div class="shadow dark:shadow-gray-800 bg-white dark:bg-slate-900 p-4 sticky top-20">
+                    <div class="" style="padding: 30px 0;border: 1px solid #f0f0f0;box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1) , -8px -8px 8px white">
                         <div class="filters-group-wrap text-center">
                             <div class="filters-group">
                                 <ul class="mb-0 list-none container-filter-border-bottom filter-options">
@@ -184,7 +104,9 @@
                             @foreach ($category->menus as $menu)
                                 <div class="group lg:w-1/4 md:w-1/3 picture-item p-3" data-groups='["{{ $category->id }}"]'>
                                     <div class="group relative overflow-hidden shadow dark:shadow-gray-800">
-                                        <img src="{{ checkFile($menu->image_url) }}" alt="{{ $menu->name ?? 'No Name' }}">
+                                        <img src="{{ checkFile($menu->image_url) }}"
+                                            style="display: block;width:100%; height:150px ; border-radius:10px"
+                                         alt="{{ $menu->name ?? 'No Name' }}">
                                         <div
                                             class="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-0 group-hover:opacity-100 duration-500">
                                         </div>
@@ -203,4 +125,34 @@
                 </div>
             </div>
         </div>
-    </section> --}}
+    </section>
+
+
+    <section class="relative md:py-16 py-8">
+        <div class="container relative md:mt-8">
+            <div class="grid grid-cols-1 pb-8 text-center">
+                <h3 class="mb-6 md:text-3xl text-2xl md:leading-normal leading-normal font-semibold">Tin Tức mới</h3>
+
+                {{-- <p class="text-slate-400 max-w-xl mx-auto">Ý tưởng phong cách nhà hàng đồ ăn của chúng tôi lấy cảm hứng từ
+                    phong cách ăn uống quốc tế, đặc biệt là tại châu Á.</p> --}}
+            </div><!--end grid-->
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 mt-6 gap-6">
+
+                @foreach ($listBlogs as $listBlog)
+                    <div class="md:px-6 duration-500 text-center" style="display: flex;flex-direction: column; justify-content: center; align-items: center">
+                        <div
+                            class="d-flex justify-center ">
+                            <img src="{{ checkFile($listBlog->image) }}" alt="" class="d-block" style="width 200px;height:200px; ">
+                        </div>
+
+                        <div class="content mt-7" style="width: 310px;white-space: nowrap;overflow: hidden;">
+                            <a href="{{ route('blog.detail', $listBlog->slug) }}" style="text-overflow: ellipsis" class="title h5 text-lg font-medium hover:text-amber-500" style="font-size: 10px">{{ $listBlog->title }}</a>
+                            <p class="text-slate-400 mt-3">{{ date('d/m/Y', strtotime($listBlog->created_at)) }}</p>
+                        </div>
+                    </div>
+                @endforeach
+
+            </div>
+        </div>
+    </section>
